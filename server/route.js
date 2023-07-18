@@ -5,10 +5,12 @@ const bodyParser = require("body-parser");
 var request = require("request");
 var jsonParser = bodyParser.json();
 
+
 router.post("/compile", (req, res) => {
   const code = req.body.code;
   const input = req.body.input;
   const lang = req.body.lang;
+  // console.log(code,input,lang);
   
   var result="";
   try {
@@ -17,8 +19,11 @@ router.post("/compile", (req, res) => {
       language: lang,
       stdin: input,
       versionIndex: "0",
-      clientId: process.env.CLIENT_Id,
-      clientSecret:process.env.CLIENT_SECRET,
+      clientId: "b72f395320d93809d7a9fdb2aceaa547",
+      clientSecret:"560fa6567307d002d35e84f65f9ba859d37a24274d337cc4206b3fdd83568eae",
+      // clientId: process.env.CLIENT_Id,
+      // clientSecret: process.env.CLIENT_SECRET,
+      
     };
     request(
       {
@@ -28,14 +33,13 @@ router.post("/compile", (req, res) => {
       },
       function (error, response, body) {
         result = body;
-        console.log(body);
         if (error) {
           console.log(error);
         }
         if(result===""){
           res.send("error");
         }
-        console.log(result);
+        // console.log("res",result);
         res.json(result);
       }
     );

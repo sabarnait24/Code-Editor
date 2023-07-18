@@ -26,6 +26,35 @@ function SocketClient(props) {
 
   const roomID = props.roomID;
   const username = props.username;
+  socket.on("get-joined-members", ({ joinedusername, MembersDetails }) => {
+    console.log(MembersDetails);
+    console.log("joined username", joinedusername);
+
+    MembersDetails.map((member) =>
+    
+      member.username !== joinedusername
+        ? toast.success(`${joinedusername} joined`,{
+          toastId: 'success1',
+        })
+        : null
+    );
+
+    setClient(MembersDetails);
+  });
+
+  socket.on("joined-members-list", (data) => {
+   
+    setClient(data);
+  });
+
+  socket.on("user-disconnected", (data) => {
+    console.log("disconnect", data);
+    if (data.roomID !== roomID) return;
+    console.log("name", data.username);
+    toast.error(`${data.username} disconnected`,{
+      toastId: 'error1',
+    });
+  });
 
   useEffect(() => {
     socket.on("connection_error", (err) => handleErrors(err));
@@ -41,25 +70,6 @@ function SocketClient(props) {
     socket.emit("join", {
       roomID,
       username,
-    });
-
-    socket.on("get-joined-members", ({ joinedusername, MembersDetails }) => {
-      console.log(MembersDetails);
-      console.log("joined username", joinedusername);
-
-      MembersDetails.map((member) =>
-        member.username !== joinedusername
-          ? toast.success(`${joinedusername} joined`)
-          : null
-      );
-
-      setClient(MembersDetails);
-    });
-
-    socket.on("user-disconnected", (data) => {
-      if (data.roomID !== props.roomID) return;
-
-      toast.error(`${data.name} disconnected`);
     });
 
     // const editorRef=props.editorRef;

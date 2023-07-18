@@ -28,11 +28,9 @@ let membersRoom = new Map();
 
 io.on("connection", (Socket) => {
   Socket.on("join", (data) => {
-    console.log("data is ", data);
+
 
     const { roomID, username } = data;
-
-    console.log(roomID);
 
     if (!roomID) {
       return;
@@ -56,35 +54,53 @@ io.on("connection", (Socket) => {
     let roomID = membersRoom.get(Socket.id);
     if (roomID) {
       let room = joinedMembersDetails[roomID];
-      console.log("room", room);
+
       if (room) {
-        let index = room.findIndex((member) => member.socketID === Socket.id);
+        let index = room.findIndex((member) => member.socketId === Socket.id);
 
         if (index !== -1) {
-          // get the user details from the room and emit to all the members
           let user = room[index];
-          console.log("user", user);
+          // console.log("user", user);
           user.roomID = roomID;
           Socket.broadcast.emit("user-disconnected", user);
           room.splice(index, 1);
           joinedMembersDetails[roomID] = room;
+          // console.log("room", room);
+          io.to(roomID).emit("joined-members-list", room);
         }
-        // Socket.emit("joined-members-list", room);
       }
     }
     membersRoom.delete(Socket.id);
   });
-  // Socket.on("codechange", ({ roomID, value }) => {
-  //   console.log(Socketmap);
-  //   const Client = getAllClients(roomID);
-  //   // console.log(Client);
-  //   Client.forEach(({ socketId }) => {
-  //     console.log(socketId, value);
-  //     io.to(socketId).emit("codesync", {
-  //       value,
-  //     });
-  //   });
+  // Socket.on("codechange", ({ roomID, data }) => {
+  //   console.log("listen",data);
+  //   io.to(roomID).emit("codechangeListen",data);
+  // });
+  Socket.on("codeChange", ({roomID,value}) => {
 
+    Socket.broadcast.emit("codeChangeListen", {
+      roomID,
+      value
+    });
+  });
+  Socket.on("inputChange", ({roomID,newValue}) => {
+    // Broadcast the input change event to all connected clients
+    // console.log("here " ,newValue);
+    
+    Socket.broadcast.emit("inputChangeListen", {
+      roomID,
+      newValue
+    });
+  });
+  Socket.on('outputChange', ({roomID,output}) => {
+
+    // Broadcast the input change event to all connected clients
+    Socket.broadcast.emit("outputChangeListen", {
+      roomID,
+      output
+    });
+    
+  });
   //   // });
   // });
   // Socket.on("inputchange", ({ roomID, inputvalue }) => {

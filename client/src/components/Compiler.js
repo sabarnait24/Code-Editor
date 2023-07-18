@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 
 import logo from "../icons8-play-67.png";
 import SocketClient from "./SocketClient";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { io } from "socket.io-client";
 
@@ -15,28 +15,24 @@ const socket = io("http://localhost:5000");
 function Compiler() {
   
 const params=useParams();
-// console.log("pa" ,params);
+console.log(params);
   const [data, setData] = useState("");
-  const [output, setOutput] = useState("");
-  const [input, setInput] = useState("");
-  // const editorRef = useRef(null);
-  const roomID = params["Id"];
-  const username=params["username"];
+ const [outputValue, setOutputValue] = useState('');
+  const [inputValue, setInputValue] = useState('');
+  const roomID = params.Id;
+  const username=params.username;
 
-  // console.log("room" ,roomID);
-  // console.log("user" , username);
+  console.log(roomID);
 
   const onSubmit = async () => {
     var e = document.getElementById("langselect");
     var lang = e.value;
-
-    // console.log(input);
     const odata = {
       code: data,
       lang: lang,
-      input: input,
+      input: inputValue,
     };
-
+    console.log(odata);
     await fetch("http://localhost:5000/compile", {
       method: "POST",
       headers: {
@@ -49,40 +45,66 @@ const params=useParams();
         return result.json();
       })
       .then((getdata) => {
-        console.log(getdata["output"]);
-        setOutput(getdata["output"]);
-        // socket.emit("outputchange", {
-        //   roomID,
-        //   outputvalue: getdata["output"],
-        // });
+        handleOutputChange(getdata.output);
       })
       .catch((err) => {
         console.log(err);
       });
   };
-  // socket.on("codesync", ( {value} ) => {
-  //   console.log("hi", value);
-  //   setData(value);
-  // });
-  useEffect(() => {
-    // socket.on("codesync", ( {value} ) => {
-    //   console.log("hi", value);
-    //   setData(value);
-    // });
-    // socket.on("inputsync", ({ inputvalue }) => {
-    //   console.log(inputvalue);
-    //   setInput(inputvalue);
-    // });
-    // socket.on("outputsync", ({ outputvalue }) => {
-    //   console.log("output is", outputvalue);
-    //   setOutput(outputvalue);
-    // });
-  }, []);
+  socket.on("codechangeListen",(data) =>{
+    setData(data);
 
-  // const location = useLocation();
-  // console.log(location);
- 
-  // const username = location.state["username"];
+  })
+
+  const handleCodeChange = (value) => {
+    console.log("hehe",value);
+    setData(value);
+    socket.emit('codeChange', {
+      roomID,
+      value
+    });
+  };
+
+  const handleInputChange = (event) => {
+    const newValue = event.target.value;
+    setInputValue(newValue);
+    socket.emit("inputChange", {
+      roomID,
+      newValue
+    });
+  };
+  const handleOutputChange = (output) => {
+    setOutputValue(output);
+    socket.emit('outputChange', {
+      roomID,
+      output
+    });
+  };
+
+  
+
+  socket.on("inputChangeListen", (data) => {
+    if(roomID!==data.roomID){
+      return;
+    }
+    setInputValue(data.newValue);
+  });
+
+  socket.on('outputChangeListen', (data) => {
+    if(roomID!==data.roomID){
+      return;
+    }
+  
+    setOutputValue(data.output);
+  });
+
+  socket.on("codeChangeListen",(data)=>{
+    console.log(data);
+    if(roomID!==data.roomID){
+      return;
+    }
+    setData(data.value);
+  })
 
   return (
     <div className="grid grid-cols-10 divide-x ">
@@ -139,13 +161,7 @@ const params=useParams();
             height="70vh"
             theme="dark"
             extensions={[javascript({ jsx: true })]}
-            onChange={(value) => {
-              setData(value);
-              socket.emit("codechange", {
-                roomID,
-                value,
-              });
-            }}
+            onChange={handleCodeChange}
           />
         </div>
 
@@ -156,14 +172,7 @@ const params=useParams();
             </p>
             <textarea
               className="textarea textarea-bordered bg-black w-full h-56 text-white text-lg font-extrabold"
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                socket.emit("inputchange", {
-                  roomID,
-                  inputvalue: e.target.value,
-                });
-              }}
+               value={inputValue} onChange={handleInputChange}
             />
           </div>
           <div className="pl-2 my-1">
@@ -172,10 +181,7 @@ const params=useParams();
             </p>
             <textarea
               className="textarea textarea-bordered bg-black w-full h-56 text-white text-lg font-extrabold"
-              value={output}
-              onChange={(e) => {
-                setOutput(e.target.value);
-              }}
+              value={outputValue}
             ></textarea>
           </div>
         </div>

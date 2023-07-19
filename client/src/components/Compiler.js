@@ -109,7 +109,7 @@ console.log(params);
   return (
     <div className="grid grid-cols-10 divide-x ">
       <div className="col-span-2 bg-slate-50">
-        <SocketClient  roomID={roomID}  username={username}  data={data}></SocketClient>
+        <SocketClient  roomID={roomID}  username={username}  data={data} socket={socket}></SocketClient>
       </div>
       <div className=" min-h-screen bg-slate-50 col-span-7">
         <h2

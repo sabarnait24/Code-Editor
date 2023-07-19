@@ -2,12 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
 import AvatarUser from "./AvatarUser";
 
-const socket = io("http://localhost:5000");
+// const socket = io("http://localhost:5000");
 
 function SocketClient(props) {
+  const socket=props.socket;
   async function copyRoomId() {
     try {
       await navigator.clipboard.writeText(props.roomID);

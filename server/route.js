@@ -11,6 +11,7 @@ router.post("/compile", (req, res) => {
   const input = req.body.input;
   const lang = req.body.lang;
   // console.log(code,input,lang);
+  // console.log("hey",process.env.CLIENT_ID);
   
   var result="";
   try {
@@ -19,12 +20,12 @@ router.post("/compile", (req, res) => {
       language: lang,
       stdin: input,
       versionIndex: "0",
-      clientId: "b72f395320d93809d7a9fdb2aceaa547",
-      clientSecret:"560fa6567307d002d35e84f65f9ba859d37a24274d337cc4206b3fdd83568eae",
-      // clientId: process.env.CLIENT_Id,
-      // clientSecret: process.env.CLIENT_SECRET,
+      clientId: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      
       
     };
+    console.log("jjh",program.clientId);
     request(
       {
         url: "https://api.jdoodle.com/v1/execute",
@@ -39,7 +40,7 @@ router.post("/compile", (req, res) => {
         if(result===""){
           res.send("error");
         }
-        // console.log("res",result);
+        console.log("res",result);
         res.json(result);
       }
     );
@@ -50,12 +51,5 @@ router.post("/compile", (req, res) => {
 
 });
 
-// router.post("/logout", (req, res) => {
-//   res.clearCookie("auth_cookie");
-//   res.status(200).json({ success: true });
-// });
-// router.post("/checkloggedin", authenticate, (req, res) => {
-//   res.json({ success: true, user: req.user });
-// });
 
 module.exports = router;

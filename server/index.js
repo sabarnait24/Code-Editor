@@ -103,31 +103,15 @@ io.on("connection", (Socket) => {
     });
     
   });
-  //   // });
-  // });
-  // Socket.on("inputchange", ({ roomID, inputvalue }) => {
-  //   // var allRooms = Array.from(io.sockets.adapter.rooms || []);
-  //   // allRooms.forEach((roomID) => {
-  //   Socket.in(roomID).emit("inputsync", {
-  //     socketId: Socket.id,
 
-  //     inputvalue,
-  //   });
-
-  //   // io.to(roomID).emit("inputsync", { inputvalue });
-  // });
-  // Socket.on("outputchange", ({ roomID, outputvalue }) => {
-  //   // console.log(inputvalue);
-  //   io.emit("outputsync", { outputvalue });
-  // });
 });
-// if (process.env.NODE_ENV === "production") {
-//   console.log("In production stage");
-//   app.use(express.static(path.resolve(__dirname, "../", "client", "build")));
-//   app.get("/", (req, res) => {
-//     res.sendFile(path.join(__dirname, "../", "client", "build", "index.html"));
-//   });
-// }
+if (process.env.NODE_ENV === "production") {
+  console.log("In production stage");
+  app.use(express.static(path.resolve(__dirname, "../", "client", "build")));
+  app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "../", "client", "build", "index.html"));
+  });
+}
 
 http.listen(port, () => {
   console.log(`connection is successful at ${port}`);

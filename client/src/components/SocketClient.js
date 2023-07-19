@@ -8,7 +8,7 @@ import AvatarUser from "./AvatarUser";
 // const socket = io("http://localhost:5000");
 
 function SocketClient(props) {
-  const socket=props.socket;
+  const socket = props.socket;
   async function copyRoomId() {
     try {
       await navigator.clipboard.writeText(props.roomID);
@@ -22,7 +22,10 @@ function SocketClient(props) {
   // const [recentUser, setRecentUser] = useState("");
   const navigate = useNavigate();
   function leaveRoom() {
+    localStorage.clear();
+
     navigate("/");
+    window.location.reload();
   }
 
   const roomID = props.roomID;
@@ -32,11 +35,10 @@ function SocketClient(props) {
     console.log("joined username", joinedusername);
 
     MembersDetails.map((member) =>
-    
       member.username !== joinedusername
-        ? toast.success(`${joinedusername} joined`,{
-          toastId: 'success1',
-        })
+        ? toast.success(`${joinedusername} joined`, {
+            toastId: "success1",
+          })
         : null
     );
 
@@ -44,7 +46,6 @@ function SocketClient(props) {
   });
 
   socket.on("joined-members-list", (data) => {
-   
     setClient(data);
   });
 
@@ -52,8 +53,8 @@ function SocketClient(props) {
     console.log("disconnect", data);
     if (data.roomID !== roomID) return;
     console.log("name", data.username);
-    toast.error(`${data.username} disconnected`,{
-      toastId: 'error1',
+    toast.error(`${data.username} disconnected`, {
+      toastId: "error1",
     });
   });
 

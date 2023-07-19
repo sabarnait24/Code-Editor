@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const fs = require("fs");
-const bodyParser = require("body-parser");
 var request = require("request");
-var jsonParser = bodyParser.json();
+
+
 
 router.post("/compile", (req, res) => {
   const code = req.body.code;
@@ -17,9 +16,12 @@ router.post("/compile", (req, res) => {
       language: lang,
       stdin: input,
       versionIndex: "0",
-      clientId: process.env.CLIENT_Id,
+      clientId: process.env.CLIENT_ID,
       clientSecret:process.env.CLIENT_SECRET,
+      
+      
     };
+
     request(
       {
         url: "https://api.jdoodle.com/v1/execute",
@@ -28,14 +30,13 @@ router.post("/compile", (req, res) => {
       },
       function (error, response, body) {
         result = body;
-        console.log(body);
         if (error) {
           console.log(error);
         }
         if(result===""){
           res.send("error");
         }
-        console.log(result);
+        // console.log("res",result);
         res.json(result);
       }
     );
@@ -46,12 +47,5 @@ router.post("/compile", (req, res) => {
 
 });
 
-// router.post("/logout", (req, res) => {
-//   res.clearCookie("auth_cookie");
-//   res.status(200).json({ success: true });
-// });
-// router.post("/checkloggedin", authenticate, (req, res) => {
-//   res.json({ success: true, user: req.user });
-// });
 
 module.exports = router;

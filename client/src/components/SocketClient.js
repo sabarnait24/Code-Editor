@@ -2,12 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
 import AvatarUser from "./AvatarUser";
 
-const socket = io("http://localhost:5000");
+// const socket = io("http://localhost:5000");
 
 function SocketClient(props) {
+  const socket = props.socket;
   async function copyRoomId() {
     try {
       await navigator.clipboard.writeText(props.roomID);
@@ -21,11 +22,41 @@ function SocketClient(props) {
   // const [recentUser, setRecentUser] = useState("");
   const navigate = useNavigate();
   function leaveRoom() {
+    localStorage.clear();
+
     navigate("/");
+    window.location.reload();
   }
 
   const roomID = props.roomID;
   const username = props.username;
+  socket.on("get-joined-members", ({ joinedusername, MembersDetails }) => {
+    console.log(MembersDetails);
+    console.log("joined username", joinedusername);
+
+    MembersDetails.map((member) =>
+      member.username !== joinedusername
+        ? toast.success(`${joinedusername} joined`, {
+            toastId: "success1",
+          })
+        : null
+    );
+
+    setClient(MembersDetails);
+  });
+
+  socket.on("joined-members-list", (data) => {
+    setClient(data);
+  });
+
+  socket.on("user-disconnected", (data) => {
+    console.log("disconnect", data);
+    if (data.roomID !== roomID) return;
+    console.log("name", data.username);
+    toast.error(`${data.username} disconnected`, {
+      toastId: "error1",
+    });
+  });
 
   useEffect(() => {
     socket.on("connection_error", (err) => handleErrors(err));
@@ -41,25 +72,6 @@ function SocketClient(props) {
     socket.emit("join", {
       roomID,
       username,
-    });
-
-    socket.on("get-joined-members", ({ joinedusername, MembersDetails }) => {
-      console.log(MembersDetails);
-      console.log("joined username", joinedusername);
-
-      MembersDetails.map((member) =>
-        member.username !== joinedusername
-          ? toast.success(`${joinedusername} joined`)
-          : null
-      );
-
-      setClient(MembersDetails);
-    });
-
-    socket.on("user-disconnected", (data) => {
-      if (data.roomID !== props.roomID) return;
-
-      toast.error(`${data.name} disconnected`);
     });
 
     // const editorRef=props.editorRef;
